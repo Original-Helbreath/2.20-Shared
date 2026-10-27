@@ -9,6 +9,7 @@
 #include "span_reader.h"
 #include "span_writer.h"
 #include "wire.h"
+#include "world_messages.h"
 
 #include <algorithm>
 #include <concepts>

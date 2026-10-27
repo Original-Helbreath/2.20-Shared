@@ -3,8 +3,9 @@
 #include <cstdint>
 
 // Every message id of the Login protocol (plan sect. 4.1, 4.4, 4.5). The high byte is the direction:
-// 0x01 client -> Login, 0x02 Login -> client, 0x03 World -> Login, 0x04 Login -> World. 0x05xx
-// (client -> World) belongs to the World server plan and is not defined here.
+// 0x01 client -> Login, 0x02 Login -> client, 0x03 World -> Login, 0x04 Login -> World, 0x05 client ->
+// World (0x0501, 0x0502: the ticket handoff of plan sect. 4.6, world_messages.h) and World -> client.
+// Game traffic after the handoff belongs to the World server plan and is not defined here.
 namespace hb::net
 {
 	enum class message_id : std::uint16_t
@@ -44,6 +45,10 @@ namespace hb::net
 		link_session_grant = 0x0405,
 		link_kick_account = 0x0406,
 		link_heartbeat_from_login = 0x0408,
+
+		// client -> World, and World -> client
+		world_enter_request = 0x0501,
+		world_enter_response = 0x0502,
 	};
 
 	enum class message_direction : std::uint8_t
@@ -53,6 +58,8 @@ namespace hb::net
 		login_to_client,
 		world_to_login,
 		login_to_world,
+		client_to_world,
+		world_to_client,
 	};
 
 	// The direction of a known id; unknown for any value this protocol does not define.
@@ -92,6 +99,10 @@ namespace hb::net
 		case message_id::link_kick_account:
 		case message_id::link_heartbeat_from_login:
 			return message_direction::login_to_world;
+		case message_id::world_enter_request:
+			return message_direction::client_to_world;
+		case message_id::world_enter_response:
+			return message_direction::world_to_client;
 		}
 		return message_direction::unknown;
 	}

@@ -20,7 +20,7 @@ namespace hb::net
 	}
 
 	// Precedes every message on every link (plan sect. 4.1). Id ranges: 0x01xx client -> Login,
-	// 0x02xx Login -> client, 0x03xx World -> Login, 0x04xx Login -> World, 0x05xx client -> World.
+	// 0x02xx Login -> client, 0x03xx World -> Login, 0x04xx Login -> World, 0x05xx client <-> World.
 	#pragma pack(push, 1)
 	struct frame_header
 	{
