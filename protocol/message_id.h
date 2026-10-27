@@ -5,7 +5,7 @@
 // Every message id of the Login protocol (plan sect. 4.1, 4.4, 4.5). The high byte is the direction:
 // 0x01 client -> Login, 0x02 Login -> client, 0x03 World -> Login, 0x04 Login -> World, 0x05 client ->
 // World (0x0501, 0x0502: the ticket handoff of plan sect. 4.6, world_messages.h) and World -> client.
-// Game traffic after the handoff belongs to the World server plan and is not defined here.
+// Game traffic after the handoff rides 0x0503 / 0x0504, a temporary envelope for the legacy game messages.
 namespace hb::net
 {
 	enum class message_id : std::uint16_t
@@ -49,6 +49,12 @@ namespace hb::net
 		// client -> World, and World -> client
 		world_enter_request = 0x0501,
 		world_enter_response = 0x0502,
+
+		// Temporary legacy envelope (SHARED-003): after world_enter_response ok, each frame carries exactly one
+		// legacy 2.20 game message as its body (DWORD msg id, WORD msg type, payload), no cipher, at most 65536
+		// bytes. These two ids go away as each game message is converted to a typed struct.
+		world_game_message = 0x0503,   // client -> World
+		client_game_message = 0x0504,  // World -> client
 	};
 
 	enum class message_direction : std::uint8_t
@@ -100,8 +106,10 @@ namespace hb::net
 		case message_id::link_heartbeat_from_login:
 			return message_direction::login_to_world;
 		case message_id::world_enter_request:
+		case message_id::world_game_message:
 			return message_direction::client_to_world;
 		case message_id::world_enter_response:
+		case message_id::client_game_message:
 			return message_direction::world_to_client;
 		}
 		return message_direction::unknown;
